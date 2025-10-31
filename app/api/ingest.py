@@ -14,12 +14,29 @@ from app.models.bets import Bet
 from app.schemas.bets import BetCreate, BetRead
 
 
-router = APIRouter(tags=["Ingest"])
+router = APIRouter(tags=["Ingestão"])
 
 
 @router.post("/ingest", response_model=BetRead)
 def ingest_bet(payload: BetCreate, db: Session = Depends(get_db)) -> Bet:
-    """Insert a single bet record provided as JSON."""
+    """Inserir uma aposta individual a partir de um payload JSON.
+
+    Exemplo de requisição::
+
+        POST /ingest
+        {
+            "user_id": "user-123",
+            "event": "Flamengo vs Palmeiras",
+            "market": "Resultado Final",
+            "odd": 1.95,
+            "stake": 100.0,
+            "payout_value": 195.0,
+            "result": "pending",
+            "is_live": false,
+            "source": "mobile-app",
+            "image_url": "https://cdn.calebet.app/bets/123.png"
+        }
+    """
 
     bet_data = payload.dict()
     if payload.payout_value is not None:
