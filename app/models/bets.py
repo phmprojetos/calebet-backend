@@ -1,23 +1,33 @@
-"""Database models for bets."""
-
 from __future__ import annotations
 
-from datetime import datetime
+from sqlalchemy import Boolean, Column, DateTime, Enum, Float, Integer, String, func
+from sqlalchemy.ext.declarative import declarative_base
+import enum
 
-from sqlalchemy import Column, DateTime, Integer, Numeric, String
+Base = declarative_base()
 
-from app.db import Base
+
+class BetResult(str, enum.Enum):
+    pending = "pending"
+    win = "win"
+    loss = "loss"
+    void = "void"
+    cashout = "cashout"
 
 
 class Bet(Base):
-    """Represents a bet registered in the system."""
-
     __tablename__ = "bets"
-
     id = Column(Integer, primary_key=True, index=True)
-    event = Column(String(255), nullable=False)
-    market = Column(String(255), nullable=False)
-    selection = Column(String(255), nullable=False)
-    odds = Column(Numeric(10, 2), nullable=False)
-    stake = Column(Numeric(10, 2), nullable=False)
-    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    user_id = Column(String, index=True)
+    event = Column(String)
+    market = Column(String)
+    odd = Column(Float)
+    stake = Column(Float)
+    payout_value = Column(Float, nullable=True)
+    profit = Column(Float, nullable=True)
+    result = Column(Enum(BetResult), default=BetResult.pending)
+    is_live = Column(Boolean, default=False)
+    source = Column(String)
+    image_url = Column(String, nullable=True)
+    created_at = Column(DateTime, server_default=func.now())
+    updated_at = Column(DateTime, onupdate=func.now())
