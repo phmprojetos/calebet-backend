@@ -17,3 +17,10 @@ Projeto FastAPI utilizando SQLAlchemy, Pydantic e Uvicorn.
    ```bash
    uvicorn app.main:app --reload
    ```
+
+## Executando com Docker
+
+```bash
+docker build -t calebet-backend .
+docker run -p 8000:8000 calebet-backend
+```
