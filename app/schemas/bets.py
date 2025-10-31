@@ -5,7 +5,7 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Optional
 
-from pydantic import BaseModel, model_validator
+from pydantic import BaseModel, Field, ConfigDict, model_validator
 
 from app.models.bets import BetResult
 
@@ -67,13 +67,13 @@ class BetBase(BaseModel):
         description="URL de uma captura de tela do comprovante da aposta.",
     )
 
-    @root_validator
-    def calculate_profit(cls, values: dict) -> dict:
-        payout_value = values.get("payout_value")
-        stake = values.get("stake")
+    @model_validator(mode="after")
+    def calculate_profit(self) -> "BetBase":
+        payout_value = self.payout_value
+        stake = self.stake
         if payout_value is not None and stake is not None:
-            values["profit"] = payout_value - stake
-        return values
+            self.profit = payout_value - stake
+        return self
 
 
 class BetCreate(BetBase):
@@ -95,8 +95,8 @@ class BetCreate(BetBase):
         }
     """
 
-    class Config:
-        schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "user_id": "user-123",
                 "event": "Flamengo vs Palmeiras",
@@ -110,6 +110,7 @@ class BetCreate(BetBase):
                 "image_url": "https://cdn.calebet.app/bets/123.png",
             }
         }
+    )
 
 
 class BetUpdate(BaseModel):
@@ -127,13 +128,13 @@ class BetUpdate(BaseModel):
     source: Optional[str] = None
     image_url: Optional[str] = None
 
-    @root_validator
-    def calculate_profit(cls, values: dict) -> dict:
-        payout_value = values.get("payout_value")
-        stake = values.get("stake")
+    @model_validator(mode="after")
+    def calculate_profit(self) -> "BetUpdate":
+        payout_value = self.payout_value
+        stake = self.stake
         if payout_value is not None and stake is not None:
-            values["profit"] = payout_value - stake
-        return values
+            self.profit = payout_value - stake
+        return self
 
 
 class BetRead(BetBase):
@@ -143,5 +144,4 @@ class BetRead(BetBase):
     created_at: datetime
     updated_at: Optional[datetime] = None
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
