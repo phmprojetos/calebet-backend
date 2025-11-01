@@ -1,0 +1,5 @@
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+ALTER TABLE public.bets
+    DROP COLUMN id,
+    ADD COLUMN id UUID PRIMARY KEY DEFAULT uuid_generate_v4();

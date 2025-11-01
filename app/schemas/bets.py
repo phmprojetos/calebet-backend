@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from datetime import datetime
+from uuid import UUID as UUIDType
 from typing import Optional
 
 from pydantic import BaseModel, Field, ConfigDict, model_validator
@@ -140,7 +141,7 @@ class BetUpdate(BaseModel):
 class BetRead(BetBase):
     """Schema returned when reading bet information."""
 
-    id: int
+    id: UUIDType
     created_at: datetime
     updated_at: Optional[datetime] = None
 
