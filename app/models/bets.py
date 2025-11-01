@@ -1,6 +1,9 @@
 from __future__ import annotations
 
-from sqlalchemy import Boolean, Column, DateTime, Enum, Float, Integer, String, func
+import uuid
+
+from sqlalchemy import Boolean, Column, DateTime, Enum, Float, String, func
+from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.ext.declarative import declarative_base
 import enum
 
@@ -17,7 +20,7 @@ class BetResult(str, enum.Enum):
 
 class Bet(Base):
     __tablename__ = "bets"
-    id = Column(Integer, primary_key=True, index=True)
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, unique=True, nullable=False)
     user_id = Column(String, index=True)
     event = Column(String)
     market = Column(String)
