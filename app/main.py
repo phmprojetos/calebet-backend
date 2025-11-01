@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api import bets, ingest
+from app.api import bets, ingest, stats
 
 
 app = FastAPI(
@@ -29,6 +29,7 @@ app.add_middleware(
 
 app.include_router(bets.router, tags=["Bets"])
 app.include_router(ingest.router, tags=["Ingestão"])
+app.include_router(stats.router)
 
 
 @app.get("/")
