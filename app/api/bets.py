@@ -1,5 +1,8 @@
+from uuid import UUID
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
+
 from app.db import get_db
 from app.models.bets import Bet
 from app.schemas.bets import BetCreate, BetRead, BetUpdate
@@ -27,7 +30,7 @@ def create_bet(bet: BetCreate, db: Session = Depends(get_db)):
         }
     """
 
-    db_bet = Bet(**bet.dict())
+    db_bet = Bet(**bet.model_dump())
     if bet.payout_value:
         db_bet.profit = bet.payout_value - bet.stake
     db.add(db_bet)
@@ -43,18 +46,18 @@ def list_bets(user_id: str = None, db: Session = Depends(get_db)):
     return q.order_by(Bet.created_at.desc()).all()
 
 @router.get("/{bet_id}", response_model=BetRead)
-def get_bet(bet_id: int, db: Session = Depends(get_db)):
-    bet = db.query(Bet).get(bet_id)
+def get_bet(bet_id: UUID, db: Session = Depends(get_db)):
+    bet = db.get(Bet, bet_id)
     if not bet:
         raise HTTPException(status_code=404, detail="Bet not found")
     return bet
 
 @router.patch("/{bet_id}", response_model=BetRead)
-def update_bet(bet_id: int, update: BetUpdate, db: Session = Depends(get_db)):
-    bet = db.query(Bet).get(bet_id)
+def update_bet(bet_id: UUID, update: BetUpdate, db: Session = Depends(get_db)):
+    bet = db.get(Bet, bet_id)
     if not bet:
         raise HTTPException(status_code=404, detail="Bet not found")
-    for k, v in update.dict(exclude_unset=True).items():
+    for k, v in update.model_dump(exclude_unset=True).items():
         setattr(bet, k, v)
     if update.payout_value is not None:
         bet.profit = update.payout_value - bet.stake
@@ -63,8 +66,8 @@ def update_bet(bet_id: int, update: BetUpdate, db: Session = Depends(get_db)):
     return bet
 
 @router.delete("/{bet_id}")
-def delete_bet(bet_id: int, db: Session = Depends(get_db)):
-    bet = db.query(Bet).get(bet_id)
+def delete_bet(bet_id: UUID, db: Session = Depends(get_db)):
+    bet = db.get(Bet, bet_id)
     if not bet:
         raise HTTPException(status_code=404, detail="Bet not found")
     db.delete(bet)
