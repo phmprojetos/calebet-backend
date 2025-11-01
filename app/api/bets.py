@@ -1,5 +1,3 @@
-from uuid import UUID
-
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
@@ -45,16 +43,16 @@ def list_bets(user_id: str = None, db: Session = Depends(get_db)):
         q = q.filter(Bet.user_id == user_id)
     return q.order_by(Bet.created_at.desc()).all()
 
-@router.get("/{bet_id}", response_model=BetRead)
-def get_bet(bet_id: UUID, db: Session = Depends(get_db)):
-    bet = db.get(Bet, bet_id)
+@router.get("/{ordem_id}", response_model=BetRead)
+def get_bet(ordem_id: str, db: Session = Depends(get_db)):
+    bet = db.query(Bet).filter(Bet.ordem_id == ordem_id).first()
     if not bet:
         raise HTTPException(status_code=404, detail="Bet not found")
     return bet
 
-@router.patch("/{bet_id}", response_model=BetRead)
-def update_bet(bet_id: UUID, update: BetUpdate, db: Session = Depends(get_db)):
-    bet = db.get(Bet, bet_id)
+@router.patch("/{ordem_id}", response_model=BetRead)
+def update_bet(ordem_id: str, update: BetUpdate, db: Session = Depends(get_db)):
+    bet = db.query(Bet).filter(Bet.ordem_id == ordem_id).first()
     if not bet:
         raise HTTPException(status_code=404, detail="Bet not found")
     for k, v in update.model_dump(exclude_unset=True).items():
@@ -65,9 +63,9 @@ def update_bet(bet_id: UUID, update: BetUpdate, db: Session = Depends(get_db)):
     db.refresh(bet)
     return bet
 
-@router.delete("/{bet_id}")
-def delete_bet(bet_id: UUID, db: Session = Depends(get_db)):
-    bet = db.get(Bet, bet_id)
+@router.delete("/{ordem_id}")
+def delete_bet(ordem_id: str, db: Session = Depends(get_db)):
+    bet = db.query(Bet).filter(Bet.ordem_id == ordem_id).first()
     if not bet:
         raise HTTPException(status_code=404, detail="Bet not found")
     db.delete(bet)
