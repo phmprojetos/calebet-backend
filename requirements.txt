@@ -1,9 +1,11 @@
 fastapi
-uvicorn
+uvicorn[standard]
 sqlalchemy
 psycopg2-binary
-pydantic
 python-dotenv
+pydantic
+pydantic-settings
+email-validator
+python-multipart
 aiofiles
 pandas
-python-multipart
