@@ -1,13 +1,17 @@
+import os
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api import bets, ingest, stats
 
+app_name = os.getenv("APP_NAME", "CALEBet API")
+app_version = os.getenv("APP_VERSION", "1.0.0")
 
 app = FastAPI(
-    title="CALEBet API",
+    title=app_name,
     description="API do sistema CALEBet (Central de Análises e Estatísticas de Apostas Esportivas).",
-    version="1.0.0",
+    version=app_version,
     contact={
         "name": "Equipe CALEBet",
         "url": "https://calebet.app",
@@ -19,9 +23,11 @@ app = FastAPI(
     },
 )
 
+origins = [origin.strip() for origin in os.getenv("ALLOWED_ORIGINS", "*").split(",") if origin.strip()]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=origins if origins else ["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -39,7 +45,7 @@ def root():
 
 @app.get("/healthcheck")
 def healthcheck():
-    return {"status": "ok"}
+    return {"status": "ok", "service": app_name}
 
 
 print("✅ Swagger disponível em http://localhost:8000/docs")
