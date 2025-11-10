@@ -1,16 +1,32 @@
+from typing import Optional
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from app.db import get_db
 from app.models import Bet
 from app.schemas.stats import BetStats, MarketStats
+from app.utils.date_filters import resolve_date_range
 
 router = APIRouter(prefix="/stats", tags=["Estatísticas"])
 
 
 @router.get("/{user_id}", response_model=BetStats)
-def get_user_stats(user_id: str, db: Session = Depends(get_db)):
-    bets = db.query(Bet).filter(Bet.user_id == user_id).all()
+def get_user_stats(
+    user_id: str,
+    filter: Optional[str] = None,
+    start_date: Optional[str] = None,
+    end_date: Optional[str] = None,
+    db: Session = Depends(get_db),
+):
+    query = db.query(Bet).filter(Bet.user_id == user_id)
+
+    date_range = resolve_date_range(filter, start_date, end_date)
+    if date_range:
+        start, end = date_range
+        query = query.filter(Bet.created_at >= start, Bet.created_at <= end)
+
+    bets = query.all()
     if not bets:
         raise HTTPException(status_code=404, detail="Nenhuma aposta encontrada")
 
