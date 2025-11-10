@@ -1,9 +1,12 @@
+from typing import Optional
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from app.db import get_db
 from app.models.bets import Bet
 from app.schemas.bets import BetCreate, BetRead, BetUpdate
+from app.utils.date_filters import resolve_date_range
 
 router = APIRouter(prefix="/bets", tags=["Bets"])
 
@@ -37,10 +40,23 @@ def create_bet(bet: BetCreate, db: Session = Depends(get_db)):
     return db_bet
 
 @router.get("/", response_model=list[BetRead])
-def list_bets(user_id: str = None, db: Session = Depends(get_db)):
+def list_bets(
+    user_id: Optional[str] = None,
+    filter: Optional[str] = None,
+    start_date: Optional[str] = None,
+    end_date: Optional[str] = None,
+    db: Session = Depends(get_db),
+):
     q = db.query(Bet)
+
     if user_id:
         q = q.filter(Bet.user_id == user_id)
+
+    date_range = resolve_date_range(filter, start_date, end_date)
+    if date_range:
+        start, end = date_range
+        q = q.filter(Bet.created_at >= start, Bet.created_at <= end)
+
     return q.order_by(Bet.created_at.desc()).all()
 
 @router.get("/{ordem_id}", response_model=BetRead)
