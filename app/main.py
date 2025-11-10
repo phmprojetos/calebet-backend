@@ -48,4 +48,4 @@ def healthcheck():
     return {"status": "ok", "service": app_name}
 
 
-print("✅ Swagger disponível em http://localhost:8000/docs")
+print("Swagger disponível em http://localhost:8000/docs")

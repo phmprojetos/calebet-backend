@@ -20,18 +20,18 @@ supabase_database_url = os.getenv("SUPABASE_DATABASE_URL")
 database_url = supabase_database_url or os.getenv("DATABASE_URL")
 
 if not database_url:
-    raise ValueError("❌ DATABASE_URL não encontrada. Verifique o .env e as variáveis de ambiente.")
+    raise ValueError("DATABASE_URL não encontrada. Verifique o .env e as variáveis de ambiente.")
 
 if supabase_database_url:
-    logger.info("✅ Using SUPABASE_DATABASE_URL (likely Supabase Pooler).")
+    logger.info("Using SUPABASE_DATABASE_URL (likely Supabase Pooler).")
 else:
-    logger.info("⚠️ Using DATABASE_URL fallback (Render internal or .env).")
+    logger.warning("Using DATABASE_URL fallback (Render internal or .env).")
 
 try:
     parsed_url = make_url(database_url)
     host = parsed_url.host or "unknown"
     port = parsed_url.port or "default"
-    logger.info("🔍 Database target: host=%s port=%s", host, port)
+    logger.info("Database target: host=%s port=%s", host, port)
 except Exception as exc:  # pragma: no cover - parsing failure should not break startup
     logger.debug("Could not parse database URL for host/port details: %s", exc)
 
