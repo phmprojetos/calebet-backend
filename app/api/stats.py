@@ -40,6 +40,11 @@ def get_user_stats(
     cashouts = [b for b in bets if b.result == "cashout"]
     positive_cashouts = [b for b in cashouts if (b.profit or 0) > 0]
 
+    def round_percentage(value: float) -> float:
+        """Round percentage values to two decimal places."""
+
+        return float(f"{value:.2f}")
+
     win_rate = (len(wins) / total_bets * 100) if total_bets else 0
     roi = ((total_profit / total_stake) * 100) if total_stake else 0
 
@@ -86,7 +91,11 @@ def get_user_stats(
         total_profit_m = v["total_profit"]
         win_rate_m = (v["wins"] / total_bets_m * 100) if total_bets_m else 0
         roi_m = ((total_profit_m / total_stake_m) * 100) if total_stake_m else 0
-        by_market[k] = MarketStats(**v, win_rate=win_rate_m, roi=roi_m)
+        by_market[k] = MarketStats(
+            **v,
+            win_rate=round_percentage(win_rate_m),
+            roi=round_percentage(roi_m),
+        )
 
     best_market = max(by_market.items(), key=lambda x: x[1].win_rate, default=(None, None))[0]
     worst_market = max(by_market.items(), key=lambda x: x[1].losses, default=(None, None))[0]
@@ -96,8 +105,8 @@ def get_user_stats(
         total_stake=round(total_stake, 2),
         total_profit=round(total_profit, 2),
         avg_odd=round(avg_odd, 2),
-        win_rate=round(win_rate, 2),
-        roi=round(roi, 2),
+        win_rate=round_percentage(win_rate),
+        roi=round_percentage(roi),
         by_result=by_result,
         by_market=by_market,
         best_market=best_market,
